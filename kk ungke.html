@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Museum — IPTEK & Reformasi Indonesia</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* ============================
+   RESET & VARIABEL
+   ============================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --bg-dark: #0a0e1a;
+    --bg-card: #131a2b;
+    --bg-card-2: #1a2340;
+    --gold: #d4af37;
+    --gold-light: #f4d03f;
+    --red: #c0392b;
+    --white: #f8f9fa;
+    --gray: #8892b0;
+    --blue: #4a9eff;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg-dark);
+    color: var(--white);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ============================
+   HERO
+   ============================ */
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    background: linear-gradient(135deg, #0a0e1a 0%, #1a2340 50%, #2c1810 100%);
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(192, 57, 43, 0.12) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 40px 20px;
+    animation: fadeInUp 1s ease;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    border-radius: 30px;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    margin-bottom: 30px;
+    font-family: 'Courier New', monospace;
+}
+
+.hero h1 {
+    font-size: clamp(1.8rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), #b8860b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+}
+
+.hero-sub {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: var(--gray);
+    margin-bottom: 40px;
+    font-style: italic;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    color: var(--gold);
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(10px); }
+}
+
+/* ============================
+   BUTTONS
+   ============================ */
+.btn {
+    display: inline-block;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--gold), #b8860b);
+    color: var(--bg-dark);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--gold);
+    border: 2px solid var(--gold);
+}
+
+.btn-outline:hover { background: var(--gold); color: var(--bg-dark); }
+
+/* ============================
+   NAV
+   ============================ */
+.nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 14, 26, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+
+.nav-menu { display: flex; gap: 25px; list-style: none; }
+
+.nav-menu a {
+    color: var(--white);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.nav-menu a:hover { color: var(--gold); }
+
+/* ============================
+   SECTIONS
+   ============================ */
+section { padding: 80px 0; }
+
+.section-title {
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    text-align: center;
+    margin-bottom: 15px;
+    color: var(--gold);
+    font-weight: 700;
+}
+
+.section-sub {
+    text-align: center;
+    color: var(--gray);
+    margin-bottom: 50px;
+    font-style: italic;
+}
+
+/* ============================
+   INTRO
+   ============================ */
+.intro { background: var(--bg-card); }
+
+.intro-text {
+    max-width: 800px;
+    margin: 0 auto 50px;
+    text-align: center;
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: #cbd5e0;
+}
+
+.intro-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 25px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.intro-stat {
+    text-align: center;
+    padding: 25px;
+    background: var(--bg-card-2);
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.intro-stat .num { font-size: 2.5rem; font-weight: 700; color: var(--gold); margin-bottom: 8px; }
+.intro-stat .lbl { color: var(--gray); font-size: 0.9rem; }
+
+/* ============================
+   TIMELINE
+   ============================ */
+.timeline-section { background: var(--bg-dark); }
+
+.timeline {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, transparent, var(--gold), transparent);
+    transform: translateX(-50%);
+}
+
+.timeline-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 40px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+
+.timeline-item.show { opacity: 1; transform: translateY(0); }
+
+.timeline-item:nth-child(odd) {
+    flex-direction: row;
+    padding-right: calc(50% + 40px);
+}
+
+.timeline-item:nth-child(even) {
+    flex-direction: row-reverse;
+    padding-left: calc(50% + 40px);
+}
+
+.timeline-dot {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background: var(--gold);
+    border: 4px solid var(--bg-dark);
+    border-radius: 50%;
+    z-index: 3;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+}
+
+.timeline-card {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.timeline-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--gold);
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2);
+}
+
+.timeline-year {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--bg-dark);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    font-family: 'Courier New', monospace;
+}
+
+.timeline-card h3 { font-size: 1.15rem; color: var(--white); margin-bottom: 10px; }
+.timeline-card p { color: var(--gray); font-size: 0.9rem; line-height: 1.6; }
+.timeline-icon { font-size: 2rem; margin-bottom: 10px; }
+
+@media (max-width: 768px) {
+    .timeline::before { left: 20px; }
+    .timeline-item,
+    .timeline-item:nth-child(odd),
+    .timeline-item:nth-child(even) {
+        flex-direction: row;
+        padding-left: 50px;
+        padding-right: 0;
+    }
+    .timeline-dot { left: 20px; }
+}
+
+/* ============================
+   STATISTIK
+   ============================ */
+.statistik { background: var(--bg-card); }
+
+.chart-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.chart-tab {
+    padding: 10px 22px;
+    background: transparent;
+    border: 1px solid var(--gray);
+    color: var(--gray);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.chart-tab:hover { border-color: var(--gold); color: var(--gold); }
+.chart-tab.active {
+    background: var(--gold);
+    color: var(--bg-dark);
+    border-color: var(--gold);
+    font-weight: 600;
+}
+
+.chart-wrapper {
+    background: var(--bg-card-2);
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+/* ============================
+   VIDEO SECTION
+   ============================ */
+.audio-section { background: var(--bg-dark); }
+
+.audio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.audio-card {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    transition: all 0.3s;
+}
+
+.audio-card:hover { border-color: var(--gold); transform: translateY(-3px); }
+.audio-icon { font-size: 2rem; margin-bottom: 12px; }
+.audio-card h3 { font-size: 1.1rem; color: var(--gold); margin-bottom: 8px; }
+.audio-desc { color: var(--gray); font-size: 0.85rem; margin-bottom: 15px; line-height: 1.5; }
+
+/* Container Video Responsif */
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* Rasio 16:9 */
+    height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    background: #000;
+}
+
+.video-wrapper iframe, 
+.video-wrapper video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    object-fit: cover;
+}
+
+.audio-info {
+    text-align: center;
+    color: var(--gray);
+    font-size: 0.85rem;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* ============================
+   FOOTER
+   ============================ */
+.footer {
+    background: #050810;
+    padding: 50px 0 30px;
+    text-align: center;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.footer h3 { color: var(--gold); margin-bottom: 12px; }
+.footer p { color: var(--gray); font-size: 0.9rem; margin-bottom: 8px; }
+.footer-sub { max-width: 600px; margin: 15px auto !important; font-style: italic; font-size: 0.85rem !important; }
+.footer-copy { margin-top: 25px; color: #4a5568 !important; font-size: 0.8rem !important; }
+
+/* ============================
+   MODAL
+   ============================ */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+}
+
+.modal.active { display: flex; animation: fadeIn 0.3s; }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: var(--bg-card);
+    padding: 40px;
+    border-radius: 16px;
+    max-width: 600px;
+    width: 100%;
+    position: relative;
+    border: 1px solid var(--gold);
+    animation: slideUp 0.4s;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    color: var(--gray);
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+.modal-close:hover { color: var(--gold); }
+
+.modal-year {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--bg-dark);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    font-family: 'Courier New', monospace;
+}
+
+.modal-title { color: var(--gold); margin-bottom: 20px; font-size: 1.5rem; }
+.modal-icon { font-size: 4rem; text-align: center; margin: 20px 0; }
+.modal-desc { color: #cbd5e0; line-height: 1.8; margin-bottom: 20px; }
+.modal-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.modal-tag {
+    padding: 5px 12px;
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--gold);
+    border-radius: 15px;
+    font-size: 0.8rem;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+@media (max-width: 768px) {
+    .nav-menu { display: none; }
+    .modal-content { padding: 25px; }
+    section { padding: 60px 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">🏛️ DIGITAL MUSEUM</div>
+        <h1>Menolak Lupa melalui Museum Digital</h1>
+        <p class="hero-sub">Perkembangan IPTEK & Reformasi Indonesia (1998 – Sekarang)</p>
+        <div class="hero-buttons">
+            <a href="#timeline" class="btn btn-primary">🕐 Jelajahi Timeline</a>
+            <a href="#video" class="btn btn-outline">🎬 Video Arsip</a>
+        </div>
+    </div>
+    <div class="scroll-indicator">⌄</div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+    <div class="nav-inner">
+        <div class="nav-brand">🏛️ Digital Museum</div>
+        <ul class="nav-menu">
+            <li><a href="#timeline">Timeline</a></li>
+            <li><a href="#statistik">Statistik</a></li>
+            <li><a href="#video">Video</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- INTRO -->
+<section class="intro">
+    <div class="container">
+        <h2 class="section-title">📖 Tentang Museum Ini</h2>
+        <p class="intro-text">
+            Museum digital ini mendokumentasikan perjalanan <strong>IPTEK (Ilmu Pengetahuan & Teknologi)</strong>
+            dan <strong>Reformasi Indonesia</strong> dari tahun <strong>1998 hingga sekarang</strong>.
+            Setiap milestone adalah saksi bisu bagaimana Indonesia bertransformasi dari era Warnet
+            hingga menjadi kekuatan digital di Asia Tenggara.
+        </p>
+        <div class="intro-stats">
+            <div class="intro-stat"><div class="num">25+</div><div class="lbl">Tahun Sejarah</div></div>
+            <div class="intro-stat"><div class="num">12</div><div class="lbl">Milestone Utama</div></div>
+            <div class="intro-stat"><div class="num">4</div><div class="lbl">Era Teknologi</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="timeline-section" id="timeline">
+    <div class="container">
+        <h2 class="section-title">🕐 Timeline Sejarah</h2>
+        <p class="section-sub">Klik setiap kartu untuk melihat detail milestone</p>
+        <div class="timeline" id="timelineContainer"></div>
+    </div>
+</section>
+
+<!-- STATISTIK -->
+<section class="statistik" id="statistik">
+    <div class="container">
+        <h2 class="section-title">📊 Grafik Perkembangan Internet Indonesia</h2>
+        <p class="section-sub">Kecepatan rata-rata & jumlah pengguna internet dari tahun ke tahun</p>
+
+        <div class="chart-tabs">
+            <button class="chart-tab active" data-chart="speed">⚡ Kecepatan Internet</button>
+            <button class="chart-tab" data-chart="users">👥 Pengguna Internet</button>
+            <button class="chart-tab" data-chart="penetration">📶 Penetrasi Seluler</button>
+        </div>
+
+        <div class="chart-wrapper">
+            <canvas id="chartSpeed"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- VIDEO SECTION (PAKAI FILE LOKAL) -->
+<section class="audio-section" id="video">
+    <div class="container">
+        <h2 class="section-title">🎬 Video Arsip Pidato Reformasi</h2>
+        <p class="section-sub">Rekaman-rekaman bersejarah yang mengubah Indonesia</p>
+
+        <div class="audio-grid">
+            
+            <!-- 1. VIDEO SOEHARTO -->
+            <div class="audio-card">
+                <div class="audio-icon">🎙️</div>
+                <h3>Pidato Soeharto — 1998</h3>
+                <p class="audio-desc">Pernyataan pengunduran diri Presiden Soeharto setelah 32 tahun berkuasa.</p>
+                <div class="video-wrapper">
+                    <video controls>
+                        <source src="soeharto.mp4" type="video/mp4">
+                        Browser kamu tidak mendukung video.
+                    </video>
+                </div>
+            </div>
+
+            <!-- 2. VIDEO HABIBIE -->
+            <div class="audio-card">
+                <div class="audio-icon">🎙️</div>
+                <h3>Pidato B.J. Habibie — 1998</h3>
+                <p class="audio-desc">Pidato Presiden B.J. Habibie setelah dilantik.</p>
+                <div class="video-wrapper">
+                    <video controls>
+                        <source src="habibie.mp4" type="video/mp4">
+                        Browser kamu tidak mendukung video.
+                    </video>
+                </div>
+            </div>
+
+            <!-- 3. VIDEO GUS DUR -->
+            <div class="audio-card">
+                <div class="audio-icon">🎙️</div>
+                <h3>Pidato Gus Dur — 1999</h3>
+                <p class="audio-desc">Pidato Presiden Abdurrahman Wahid tentang reformasi demokrasi.</p>
+                <div class="video-wrapper">
+                    <video controls>
+                        <source src="gusdur.mp4" type="video/mp4">
+                        Browser kamu tidak mendukung video.
+                    </video>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container">
+        <h3>🏛️ Digital Museum — Menolak Lupa</h3>
+        <p>Website Interactive Timeline & Digital Mini-Museum</p>
+        <p class="footer-sub">Tema: "Menolak Lupa melalui Museum Digital Perkembangan IPTEK & Reformasi Indonesia"</p>
+        <p class="footer-copy">© 2026 — Dibuat untuk tugas kelompok</p>
+    </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <button class="modal-close" id="modalClose">✕</button>
+        <div class="modal-year" id="modalYear"></div>
+        <h2 class="modal-title" id="modalTitle"></h2>
+        <div class="modal-icon" id="modalIcon"></div>
+        <p class="modal-desc" id="modalDesc"></p>
+        <div class="modal-tags" id="modalTags"></div>
+    </div>
+</div>
+
+<script>
+/* ============================
+   DATA TIMELINE
+   ============================ */
+const timelineData = [
+    {
+        year: "1998",
+        icon: "✊",
+        title: "Reformasi & Lengsernya Soeharto",
+        short: "Momen bersejarah runtuhnya Orde Baru setelah 32 tahun berkuasa.",
+        desc: "Setelah krisis moneter 1997-1998 dan gelombang demonstrasi mahasiswa di seluruh Indonesia, Presiden Soeharto mengundurkan diri pada 21 Mei 1998. Ini menandai dimulainya era Reformasi dan keterbukaan informasi di Indonesia.",
+        tags: ["Reformasi", "Demokrasi", "Orde Baru"]
+    },
+    {
+        year: "1998-2000",
+        icon: "🌐",
+        title: "Era Warnet & Internet Pertama",
+        short: "Warung Internet (Warnet) menjamur di kota-kota besar.",
+        desc: "Warnet menjadi pintu gerbang internet pertama bagi jutaan orang Indonesia. Dengan tarif Rp5.000-8.000 per jam, masyarakat bisa mengakses email, chatting (mIRC), dan browsing. Ini awal mula budaya digital Indonesia.",
+        tags: ["Internet", "Warnet", "mIRC"]
+    },
+    {
+        year: "2002",
+        icon: "📡",
+        title: "Migrasi TV Analog ke Digital Dimulai",
+        short: "Indonesia mulai merencanakan migrasi penyiaran digital.",
+        desc: "Pemerintah mulai membahas migrasi TV analog ke digital. Meskipun baru terealisasi penuh pada 2022, diskusi ini menandai kesadaran akan pentingnya efisiensi spektrum frekuensi dan kualitas penyiaran yang lebih baik.",
+        tags: ["TV Digital", "Broadcast", "Teknologi"]
+    },
+    {
+        year: "2003",
+        icon: "💻",
+        title: "Era Game Online di Warnet",
+        short: "Game online seperti Ragnarok dan CS mulai populer.",
+        desc: "Warnet bukan cuma untuk browsing, tapi juga jadi pusat game online. Ragnarok Online, Counter-Strike, dan Warcraft III menjadi fenomena. Lahir generasi gamer Indonesia pertama yang bermain bersama secara online.",
+        tags: ["Gaming", "Online", "Warnet"]
+    },
+    {
+        year: "2005-2008",
+        icon: "📱",
+        title: "Masuknya 3G & Ledakan Ponsel",
+        short: "Operator seluler berlomba menyediakan layanan 3G.",
+        desc: "Teknologi 3G memungkinkan akses internet melalui ponsel. Telkomsel, Indosat, dan XL berlomba-lomba menyediakan layanan ini. Harga ponsel terjangkau, penetrasi seluler meroket, dan SMS jadi budaya baru.",
+        tags: ["3G", "Ponsel", "Seluler"]
+    },
+    {
+        year: "2008",
+        icon: "⚖️",
+        title: "UU ITE Pertama Disahkan",
+        short: "Undang-Undang Informasi dan Transaksi Elektronik.",
+        desc: "UU No. 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik disahkan. Ini adalah fondasi hukum pertama untuk aktivitas digital di Indonesia — mengatur transaksi elektronik, tanda tangan digital, dan konten online.",
+        tags: ["Regulasi", "UU ITE", "Hukum Digital"]
+    },
+    {
+        year: "2010-2013",
+        icon: "📲",
+        title: "Era Smartphone & Media Sosial",
+        short: "Blackberry, Android, dan ledakan media sosial.",
+        desc: "Blackberry sempat berjaya, lalu digantikan Android dan iOS. Facebook, Twitter, Instagram, dan Path menjadi bagian hidup sehari-hari. Indonesia menjadi salah satu pengguna media sosial terbesar di dunia.",
+        tags: ["Smartphone", "MedSos", "Android"]
+    },
+    {
+        year: "2013-2016",
+        icon: "🚀",
+        title: "Kelahiran Start-up Unicorn",
+        short: "Gojek, Tokopedia, Bukalapak, Traveloka lahir.",
+        desc: "Indonesia menyaksikan ledakan start-up. Gojek (2010), Tokopedia (2009), Bukalapak (2010), Traveloka (2012) tumbuh jadi unicorn. Ekonomi digital Indonesia menjadi yang terbesar di Asia Tenggara.",
+        tags: ["Startup", "Unicorn", "Ekonomi Digital"]
+    },
+    {
+        year: "2019-2021",
+        icon: "🦠",
+        title: "Peluncuran 5G & Pandemi Digital",
+        short: "5G masuk, pandemi mempercepat transformasi digital.",
+        desc: "Telkomsel meluncurkan 5G pertama pada 2021. Pandemi COVID-19 memaksa semua orang belajar online, kerja remote, dan belanja digital. Dalam 2 tahun, transformasi digital yang biasanya butuh 10 tahun terjadi.",
+        tags: ["5G", "Pandemi", "Digital"]
+    },
+    {
+        year: "2022-2023",
+        icon: "📺",
+        title: "Migrasi TV Analog ke Digital Selesai",
+        short: "Analog Switch Off (ASO) di seluruh Indonesia.",
+        desc: "Indonesia resmi menghentikan siaran TV analog dan beralih ke digital. Masyarakat bisa menikmati siaran berkualitas HD gratis via set-top box. Ini salah satu migrasi terbesar dalam sejarah penyiaran Indonesia.",
+        tags: ["ASO", "TV Digital", "Broadcast"]
+    },
+    {
+        year: "2023-2024",
+        icon: "🤖",
+        title: "Era AI & Digitalisasi UMKM",
+        short: "Kecerdasan buatan & pembayaran digital merajalela.",
+        desc: "ChatGPT, AI generatif, dan QRIS mengubah cara orang bekerja dan bertransaksi. UMKM Indonesia mengadopsi pembayaran digital secara masif. Indonesia jadi salah satu pasar QRIS terbesar di dunia.",
+        tags: ["AI", "QRIS", "UMKM Digital"]
+    },
+    {
+        year: "2025-Sekarang",
+        icon: "🌏",
+        title: "Indonesia Digital 2030",
+        short: "Menuju transformasi digital penuh.",
+        desc: "Indonesia menargetkan menjadi kekuatan digital terbesar di Asia Tenggara. Data center nasional, talenta digital, dan ekosistem AI menjadi fokus utama. Perjalanan masih panjang, tapi fondasi sudah kuat.",
+        tags: ["Visi 2030", "Digital", "Masa Depan"]
+    }
+];
+
+/* ============================
+   RENDER TIMELINE
+   ============================ */
+const timelineContainer = document.getElementById('timelineContainer');
+
+timelineData.forEach((item, index) => {
+    const el = document.createElement('div');
+    el.className = 'timeline-item';
+    el.innerHTML = `
+        <div class="timeline-dot"></div>
+        <div class="timeline-card" data-index="${index}">
+            <div class="timeline-icon">${item.icon}</div>
+            <div class="timeline-year">${item.year}</div>
+            <h3>${item.title}</h3>
+            <p>${item.short}</p>
+        </div>
+    `;
+    timelineContainer.appendChild(el);
+});
+
+/* ============================
+   MODAL DETAIL
+   ============================ */
+const modal = document.getElementById('modal');
+const modalClose = document.getElementById('modalClose');
+
+document.querySelectorAll('.timeline-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const idx = card.dataset.index;
+        const data = timelineData[idx];
+        document.getElementById('modalYear').textContent = data.year;
+        document.getElementById('modalTitle').textContent = data.title;
+        document.getElementById('modalIcon').textContent = data.icon;
+        document.getElementById('modalDesc').textContent = data.desc;
+        document.getElementById('modalTags').innerHTML = data.tags
+            .map(t => `<span class="modal-tag">#${t}</span>`).join('');
+        modal.classList.add('active');
+    });
+});
+
+modalClose.addEventListener('click', () => modal.classList.remove('active'));
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('active');
+});
+
+/* ============================
+   SCROLL ANIMATION
+   ============================ */
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('show');
+    });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.timeline-item').forEach(item => observer.observe(item));
+
+/* ============================
+   CHART
+   ============================ */
+const chartData = {
+    labels: ['2000', '2003', '2006', '2009', '2012', '2015', '2018', '2021', '2023', '2025'],
+    speed: { label: 'Kecepatan Internet (Mbps)', data: [0.05, 0.1, 0.3, 0.8, 2.5, 6, 15, 30, 50, 75], color: 'rgba(212, 175, 55, 0.8)' },
+    users: { label: 'Pengguna Internet (Juta)', data: [2, 8, 16, 30, 55, 88, 130, 175, 210, 230], color: 'rgba(74, 158, 255, 0.8)' },
+    penetration: { label: 'Penetrasi Seluler (%)', data: [5, 15, 35, 60, 90, 120, 140, 150, 160, 170], color: 'rgba(46, 204, 113, 0.8)' }
+};
+
+let currentChart = null;
+
+function renderChart(type) {
+    const ctx = document.getElementById('chartSpeed').getContext('2d');
+    if (currentChart) currentChart.destroy();
+
+    currentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: chartData[type].label,
+                data: chartData[type].data,
+                borderColor: chartData[type].color,
+                backgroundColor: chartData[type].color.replace('0.8', '0.15'),
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: chartData[type].color,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { labels: { color: '#f8f9fa', font: { size: 14 } } },
+                tooltip: {
+                    backgroundColor: '#131a2b',
+                    titleColor: '#d4af37',
+                    bodyColor: '#f8f9fa',
+                    borderColor: '#d4af37',
+                    borderWidth: 1,
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#8892b0' }, grid: { color: 'rgba(136, 146, 176, 0.1)' } },
+                y: { ticks: { color: '#8892b0' }, grid: { color: 'rgba(136, 146, 176, 0.1)' }, beginAtZero: true }
+            }
+        }
+    });
+}
+
+renderChart('speed');
+
+document.querySelectorAll('.chart-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderChart(tab.dataset.chart);
+    });
+});
+
+/* ============================
+   SMOOTH SCROLL
+   ============================ */
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+            const offset = 80;
+            const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+            window.scrollTo({ top, behavior: 'smooth' });
+        }
+    });
+});
+</script>
+
+</body>
+</html>
